@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+
+  frontend:
+    build:
+      context: ./applications/frontend
+      dockerfile: Dockerfile
+    container_name: cc-frontend
+    ports:
+      - "${FRONTEND_PORT}:5173"
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: ./applications/api-gateway
+      dockerfile: Dockerfile
+    container_name: cc-api-gateway
+    ports:
+      - "${API_PORT}:8000"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${POSTGRES_DB}
+      DATABASE_USER: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: cc-postgres
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: cc-redis
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redis_data:/data
+
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
