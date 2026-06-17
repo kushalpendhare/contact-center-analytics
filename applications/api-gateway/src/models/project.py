@@ -24,3 +24,4 @@ class Project(Base):
     tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
 
     tenant = relationship("Tenant", back_populates="projects")
+    recordings = relationship("Recording", back_populates="project", cascade="all, delete-orphan")

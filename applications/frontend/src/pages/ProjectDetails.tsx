@@ -144,10 +144,10 @@ function ProjectDetails() {
                 <strong>SIP Analysis</strong>
                 <span>Attach traces and troubleshoot signaling flows.</span>
               </div>
-              <div className="module-tile">
+              <Link to={`/projects/${projectId}/recordings`} className="module-tile" style={{ textDecoration: "none", color: "inherit" }}>
                 <strong>Recordings</strong>
                 <span>Review audio and transcripts for this project.</span>
-              </div>
+              </Link>
               <div className="module-tile">
                 <strong>AI Analysis</strong>
                 <span>Generate summaries, checks, and recommendations.</span>

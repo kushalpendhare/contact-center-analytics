@@ -19,5 +19,7 @@ class Settings:
         "local-development-secret-change-before-production"
     )
 
+    UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./uploads")
+
 
 settings = Settings()
