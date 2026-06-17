@@ -10,17 +10,22 @@ import type { DashboardSummary, HealthStatus } from "../services/projectService"
 function Dashboard() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [health, setHealth] = useState<HealthStatus | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true);
     Promise.all([getDashboardSummary(), getSystemHealth()])
       .then(([summaryData, healthData]) => {
         setSummary(summaryData);
         setHealth(healthData);
+        setError("");
       })
       .catch(() => {
         setError("Unable to load dashboard data. Check that the API is running.");
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -40,6 +45,7 @@ function Dashboard() {
       </section>
 
       {error && <div className="alert">{error}</div>}
+      {loading && <div className="alert">Loading dashboard...</div>}
 
       <section className="metric-grid">
         <div className="metric-card">

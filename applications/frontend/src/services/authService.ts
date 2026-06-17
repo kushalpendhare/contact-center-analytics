@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 const TOKEN_KEY = "cc_access_token";
 const USER_KEY = "cc_current_user";
 
@@ -78,4 +78,25 @@ export async function registerUser(registration: RegisterInput) {
 
 export async function loginUser(credentials: LoginInput) {
   return authRequest<AuthResponse>(`${API_URL}/auth/login`, credentials);
+}
+
+export async function getCurrentUser(): Promise<CurrentUser> {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw new Error("No access token");
+  }
+
+  const response = await fetch(`${API_URL}/auth/me`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  return response.json();
 }

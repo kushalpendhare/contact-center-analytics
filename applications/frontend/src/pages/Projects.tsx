@@ -7,22 +7,27 @@ import MainLayout from "../layouts/MainLayout";
 
 function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [platform, setPlatform] = useState("");
   const [customer, setCustomer] = useState("");
   const [error, setError] = useState("");
 
   const loadProjects = async () => {
+    setLoading(true);
     try {
       const data = await getProjects();
       setProjects(data);
       setError("");
     } catch {
       setError("Unable to load projects. Check that the API is running.");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadProjects();
   }, []);
 
@@ -30,6 +35,7 @@ function Projects() {
     e.preventDefault();
 
     try {
+      setLoading(true);
       await createProject({
         name,
         platform,
@@ -44,6 +50,8 @@ function Projects() {
     } catch {
       setError("Unable to create project. Check the form and API connection.");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -94,8 +102,8 @@ function Projects() {
             />
           </label>
 
-          <button className="button primary" type="submit">
-            Create Project
+          <button className="button primary" type="submit" disabled={loading}>
+            {loading ? "Processing..." : "Create Project"}
           </button>
         </form>
       </section>

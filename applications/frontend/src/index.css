@@ -259,6 +259,16 @@ label {
   color: var(--danger);
 }
 
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button:disabled:hover {
+  background-color: inherit;
+  color: inherit;
+}
+
 .button-row {
   display: flex;
   flex-wrap: wrap;

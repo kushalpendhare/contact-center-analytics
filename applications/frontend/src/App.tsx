@@ -1,4 +1,6 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { getAccessToken, getCurrentUser, clearSession } from "./services/authService";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
@@ -9,6 +11,19 @@ import Settings from "./pages/Settings";
 import Uploads from "./pages/Uploads";
 
 function App() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = getAccessToken();
+
+    if (!token) return;
+
+    getCurrentUser().catch(() => {
+      clearSession();
+      navigate("/login");
+    });
+  }, [navigate]);
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
