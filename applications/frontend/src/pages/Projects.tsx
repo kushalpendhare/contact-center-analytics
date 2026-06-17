@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getProjects, createProject } from "../services/projectService";
+import MainLayout from "../layouts/MainLayout";
 
 function Projects() {
   const [projects, setProjects] = useState<any[]>([]);
@@ -33,7 +34,7 @@ function Projects() {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <MainLayout>
       <h1>Projects</h1>
 
       <form onSubmit={handleSubmit}>
@@ -83,7 +84,7 @@ function Projects() {
           ))}
         </tbody>
       </table>
-    </div>
+    </MainLayout>
   );
 }
 
