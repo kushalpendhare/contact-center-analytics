@@ -14,5 +14,10 @@ class Settings:
     REDIS_HOST = os.getenv("REDIS_HOST", "redis")
     REDIS_PORT = os.getenv("REDIS_PORT", "6379")
 
+    AUTH_SECRET_KEY = os.getenv(
+        "AUTH_SECRET_KEY",
+        "local-development-secret-change-before-production"
+    )
+
 
 settings = Settings()

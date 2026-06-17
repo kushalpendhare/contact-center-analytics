@@ -21,6 +21,8 @@ if config.config_file_name is not None:
 from src.models.base import Base
 from src.models.call import Call
 from src.models.project import Project
+from src.models.tenant import Tenant
+from src.models.user import User
 from src.core.database import DATABASE_URL
 
 target_metadata = Base.metadata

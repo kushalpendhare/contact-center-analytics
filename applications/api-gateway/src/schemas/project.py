@@ -19,6 +19,7 @@ class ProjectResponse(BaseModel):
     name: str
     platform: str
     customer: str
+    tenant_id: int
 
     class Config:
         from_attributes = True

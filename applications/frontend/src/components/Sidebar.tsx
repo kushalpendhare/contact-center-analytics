@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { clearSession, getStoredUser } from "../services/authService";
 
 const links = [
   { to: "/", label: "Dashboard" },
@@ -9,6 +10,13 @@ const links = [
 ];
 
 function Sidebar() {
+  const user = getStoredUser();
+
+  const handleSignOut = () => {
+    clearSession();
+    window.location.href = "/login";
+  };
+
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -31,6 +39,14 @@ function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      <div className="sidebar-footer">
+        <span>{user?.tenant.name ?? "Local Workspace"}</span>
+        <strong>{user?.full_name ?? "Local User"}</strong>
+        <button type="button" onClick={handleSignOut}>
+          Sign out
+        </button>
+      </div>
     </aside>
   );
 }

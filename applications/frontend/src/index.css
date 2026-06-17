@@ -157,6 +157,33 @@ label {
   gap: 8px;
 }
 
+.sidebar-footer {
+  border-top: 1px solid rgba(148, 163, 184, 0.24);
+  display: grid;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.sidebar-footer span {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.sidebar-footer strong {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.sidebar-footer button {
+  background: transparent;
+  border: 0;
+  color: #cbd5e1;
+  cursor: pointer;
+  padding: 6px 0 0;
+  text-align: left;
+}
+
 .nav-link {
   border-radius: 8px;
   color: #cbd5e1;
@@ -401,6 +428,52 @@ label {
 .empty-state {
   display: grid;
   gap: 8px;
+}
+
+.auth-page {
+  align-items: center;
+  background: var(--bg);
+  display: grid;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.auth-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 22px;
+  margin: 0 auto;
+  max-width: 480px;
+  padding: 28px;
+  width: 100%;
+}
+
+.segmented-control {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 4px;
+}
+
+.segmented-control button {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 800;
+  padding: 10px;
+}
+
+.segmented-control button.active {
+  background: #ffffff;
+  color: var(--text-strong);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
 }
 
 @media (max-width: 900px) {

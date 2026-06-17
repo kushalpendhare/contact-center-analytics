@@ -1,6 +1,9 @@
 import MainLayout from "../layouts/MainLayout";
+import { getStoredUser } from "../services/authService";
 
 function Settings() {
+  const user = getStoredUser();
+
   return (
     <MainLayout>
       <section className="page-header">
@@ -14,10 +17,10 @@ function Settings() {
       </section>
 
       <section className="panel">
-        <h2>Local MVP Mode</h2>
+        <h2>Workspace</h2>
         <p className="muted">
-          Authentication and tenant isolation are intentionally not enabled yet. The current build
-          is focused on one local workspace with working API, database, and cache integration.
+          {user?.tenant.name ?? "Local Workspace"} is the active tenant for this browser session.
+          Projects are now scoped to this workspace.
         </p>
       </section>
     </MainLayout>

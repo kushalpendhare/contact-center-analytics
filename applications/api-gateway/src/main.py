@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from src.core.database import check_database
 from src.core.redis_client import check_redis
+from src.routers.auth import router as auth_router
 from src.routers.dashboard import router as dashboard_router
 from src.routers.projects import router as projects_router
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,6 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
 app.include_router(dashboard_router)
 app.include_router(projects_router)
 

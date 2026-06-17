@@ -39,6 +39,7 @@ services:
 
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY:-local-development-secret-change-before-production}
 
   postgres:
     image: postgres:16-alpine

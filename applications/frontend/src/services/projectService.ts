@@ -1,5 +1,7 @@
 // src/services/projectService.ts
 
+import { getAccessToken } from "./authService";
+
 const API_URL = "http://localhost:8000";
 
 export type Project = {
@@ -7,6 +9,7 @@ export type Project = {
   name: string;
   platform: string;
   customer: string;
+  tenant_id: number;
 };
 
 export type ProjectInput = {
@@ -16,7 +19,17 @@ export type ProjectInput = {
 };
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(url, options);
+  const token = getAccessToken();
+  const headers = new Headers(options?.headers);
+
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const response = await fetch(url, {
+    ...options,
+    headers,
+  });
 
   if (!response.ok) {
     throw new Error(`Request failed with status ${response.status}`);
