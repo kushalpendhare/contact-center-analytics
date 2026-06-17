@@ -18,6 +18,10 @@ services:
       context: ./applications/api-gateway
       dockerfile: Dockerfile
     container_name: cc-api-gateway
+
+    volumes:
+      - ./applications/api-gateway:/app
+      
     ports:
       - "${API_PORT}:8000"
     depends_on:
