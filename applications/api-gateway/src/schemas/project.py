@@ -7,6 +7,13 @@ class ProjectCreate(BaseModel):
     platform: str
     customer: str
 
+
+class ProjectUpdate(BaseModel):
+    name: str
+    platform: str
+    customer: str
+
+
 class ProjectResponse(BaseModel):
     id: int
     name: str

@@ -2,23 +2,80 @@
 
 const API_URL = "http://localhost:8000";
 
-export async function getProjects() {
-  const response = await fetch(`${API_URL}/projects`);
-  return response.json();
-}
-
-export async function createProject(project: {
+export type Project = {
+  id: number;
   name: string;
   platform: string;
   customer: string;
-}) {
-  const response = await fetch(`${API_URL}/projects`, {
+};
+
+export type ProjectInput = {
+  name: string;
+  platform: string;
+  customer: string;
+};
+
+async function request<T>(url: string, options?: RequestInit): Promise<T> {
+  const response = await fetch(url, options);
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function getProjects() {
+  return request<Project[]>(`${API_URL}/projects`);
+}
+
+export async function getProject(projectId: string) {
+  return request<Project>(`${API_URL}/projects/${projectId}`);
+}
+
+export async function createProject(project: ProjectInput) {
+  return request<Project>(`${API_URL}/projects`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(project),
   });
+}
 
-  return response.json();
+export async function updateProject(projectId: number, project: ProjectInput) {
+  return request<Project>(`${API_URL}/projects/${projectId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(project),
+  });
+}
+
+export async function deleteProject(projectId: number) {
+  return request<Project>(`${API_URL}/projects/${projectId}`, {
+    method: "DELETE",
+  });
+}
+
+export type HealthStatus = {
+  status: string;
+  database: string;
+  redis: string;
+};
+
+export async function getSystemHealth() {
+  return request<HealthStatus>(`${API_URL}/health`);
+}
+
+export type DashboardSummary = {
+  project_count: number;
+  platform_counts: Record<string, number>;
+  recent_projects: Project[];
+  cached: boolean;
+};
+
+export async function getDashboardSummary() {
+  return request<DashboardSummary>(`${API_URL}/dashboard/summary`);
 }

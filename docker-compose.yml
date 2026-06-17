@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     container_name: cc-frontend
     ports:
-      - "${FRONTEND_PORT}:5173"
+      - "${FRONTEND_PORT:-5173}:5173"
     depends_on:
       - api-gateway
     restart: unless-stopped
@@ -23,17 +23,19 @@ services:
       - ./applications/api-gateway:/app
       
     ports:
-      - "${API_PORT}:8000"
+      - "${API_PORT:-8000}:8000"
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     environment:
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
-      DATABASE_NAME: ${POSTGRES_DB}
-      DATABASE_USER: ${POSTGRES_USER}
-      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_NAME: ${POSTGRES_DB:-contactcenter}
+      DATABASE_USER: ${POSTGRES_USER:-admin}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
 
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -43,15 +45,21 @@ services:
     container_name: cc-postgres
 
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-contactcenter}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
 
     ports:
       - "5432:5432"
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-admin} -d $${POSTGRES_DB:-contactcenter}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
     restart: unless-stopped
 
@@ -64,6 +72,12 @@ services:
 
     volumes:
       - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
     restart: unless-stopped
 

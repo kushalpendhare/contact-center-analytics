@@ -1,89 +1,137 @@
 import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { getProjects, createProject } from "../services/projectService";
+import type { Project } from "../services/projectService";
 import MainLayout from "../layouts/MainLayout";
 
 function Projects() {
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [name, setName] = useState("");
   const [platform, setPlatform] = useState("");
   const [customer, setCustomer] = useState("");
+  const [error, setError] = useState("");
 
   const loadProjects = async () => {
-    const data = await getProjects();
-    setProjects(data);
+    try {
+      const data = await getProjects();
+      setProjects(data);
+      setError("");
+    } catch {
+      setError("Unable to load projects. Check that the API is running.");
+    }
   };
 
   useEffect(() => {
     loadProjects();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    await createProject({
-      name,
-      platform,
-      customer,
-    });
+    try {
+      await createProject({
+        name,
+        platform,
+        customer,
+      });
 
-    setName("");
-    setPlatform("");
-    setCustomer("");
+      setName("");
+      setPlatform("");
+      setCustomer("");
 
-    loadProjects();
+      loadProjects();
+    } catch {
+      setError("Unable to create project. Check the form and API connection.");
+    }
   };
 
   return (
     <MainLayout>
-      <h1>Projects</h1>
+      <section className="page-header">
+        <div>
+          <p className="eyebrow">Customer workspaces</p>
+          <h1>Projects</h1>
+          <p className="page-subtitle">
+            Create and manage the contact center initiatives your teams are working on.
+          </p>
+        </div>
+      </section>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          placeholder="Project Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+      {error && <div className="alert">{error}</div>}
 
-        <input
-          placeholder="Platform"
-          value={platform}
-          onChange={(e) => setPlatform(e.target.value)}
-        />
+      <section className="panel">
+        <h2>Create Project</h2>
 
-        <input
-          placeholder="Customer"
-          value={customer}
-          onChange={(e) => setCustomer(e.target.value)}
-        />
+        <form className="form-grid" onSubmit={handleSubmit}>
+          <label>
+            Project Name
+            <input
+              placeholder="IVR Migration"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </label>
 
-        <button type="submit">
-          Create Project
-        </button>
-      </form>
+          <label>
+            Platform
+            <input
+              placeholder="Genesys Cloud"
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+              required
+            />
+          </label>
 
-      <hr />
+          <label>
+            Customer
+            <input
+              placeholder="Acme Corp"
+              value={customer}
+              onChange={(e) => setCustomer(e.target.value)}
+              required
+            />
+          </label>
 
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Platform</th>
-            <th>Customer</th>
-          </tr>
-        </thead>
+          <button className="button primary" type="submit">
+            Create Project
+          </button>
+        </form>
+      </section>
 
-        <tbody>
-          {projects.map((project) => (
-            <tr key={project.id}>
-              <td>{project.id}</td>
-              <td>{project.name}</td>
-              <td>{project.platform}</td>
-              <td>{project.customer}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <section className="panel">
+        <div className="section-title">
+          <h2>All Projects</h2>
+          <span>{projects.length} total</span>
+        </div>
+
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Platform</th>
+                <th>Customer</th>
+                <th>ID</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {projects.map((project) => (
+                <tr key={project.id}>
+                  <td>
+                    <Link to={`/projects/${project.id}`}>{project.name}</Link>
+                  </td>
+                  <td>{project.platform}</td>
+                  <td>{project.customer}</td>
+                  <td>{project.id}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </MainLayout>
   );
 }

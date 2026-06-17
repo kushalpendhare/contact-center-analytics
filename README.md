@@ -10,6 +10,32 @@ This project is being built as a hands-on learning initiative to gain practical 
 
 ---
 
+## Local MVP
+
+The current runnable application is local-first. It uses:
+
+- React + TypeScript frontend
+- FastAPI API gateway
+- PostgreSQL database
+- Redis cache
+- Docker Compose
+
+Run the local stack:
+
+```bash
+docker compose up --build
+```
+
+Open the app:
+
+- Frontend: http://localhost:5173
+- API docs: http://localhost:8000/docs
+- Health check: http://localhost:8000/health
+
+The API container runs Alembic migrations on startup so a fresh Docker volume can create the required database tables automatically.
+
+---
+
 ## Project Objectives
 
 - Build a real-world cloud-native application

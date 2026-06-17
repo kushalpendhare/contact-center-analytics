@@ -1,26 +1,37 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+
+const links = [
+  { to: "/", label: "Dashboard" },
+  { to: "/projects", label: "Projects" },
+  { to: "/uploads", label: "Uploads" },
+  { to: "/reports", label: "Reports" },
+  { to: "/settings", label: "Settings" },
+];
 
 function Sidebar() {
   return (
-    <div
-      style={{
-        width: "250px",
-        height: "100vh",
-        background: "#1f2937",
-        color: "white",
-        padding: "20px",
-      }}
-    >
-      <h2>CC Platform</h2>
+    <aside className="sidebar">
+      <div className="brand">
+        <span className="brand-mark">CC</span>
+        <div>
+          <strong>CC Platform</strong>
+          <span>Engineering Ops</span>
+        </div>
+      </div>
 
       <nav>
-        <p><Link to="/">Dashboard</Link></p>
-        <p><Link to="/projects">Projects</Link></p>
-        <p><Link to="/uploads">Uploads</Link></p>
-        <p><Link to="/reports">Reports</Link></p>
-        <p><Link to="/settings">Settings</Link></p>
+        {links.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+            end={link.to === "/"}
+          >
+            {link.label}
+          </NavLink>
+        ))}
       </nav>
-    </div>
+    </aside>
   );
 }
 

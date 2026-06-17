@@ -6,17 +6,12 @@ type Props = {
 
 function MainLayout({ children }: Props) {
   return (
-    <div style={{ display: "flex" }}>
+    <div className="app-shell">
       <Sidebar />
 
-      <div
-        style={{
-          flex: 1,
-          padding: "20px",
-        }}
-      >
+      <main className="main-content">
         {children}
-      </div>
+      </main>
     </div>
   );
 }
