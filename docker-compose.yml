@@ -1,87 +1,50 @@
-version: "3.9"
-
 services:
-
   frontend:
     build:
       context: ./applications/frontend
-      dockerfile: Dockerfile
-    container_name: cc-frontend
     ports:
-      - "${FRONTEND_PORT:-5173}:5173"
-    depends_on:
-      - api-gateway
-    restart: unless-stopped
+      - "5173:5173"
 
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ccanalytics
+      POSTGRES_USER: ccadmin
+      POSTGRES_PASSWORD: ccpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
   api-gateway:
     build:
       context: ./applications/api-gateway
-      dockerfile: Dockerfile
-    container_name: cc-api-gateway
-
-    volumes:
-      - ./applications/api-gateway:/app
-      
     ports:
-      - "${API_PORT:-8000}:8000"
+      - "8000:8000"
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    restart: unless-stopped
-    environment:
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_NAME: ${POSTGRES_DB:-contactcenter}
-      DATABASE_USER: ${POSTGRES_USER:-admin}
-      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY:-local-development-secret-change-before-production}
-
-  postgres:
-    image: postgres:16-alpine
-    container_name: cc-postgres
-
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-contactcenter}
-      POSTGRES_USER: ${POSTGRES_USER:-admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-
-    ports:
-      - "5432:5432"
-
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-admin} -d $${POSTGRES_DB:-contactcenter}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-    restart: unless-stopped
+      - postgres
+      - redis
 
   redis:
-    image: redis:7-alpine
-    container_name: cc-redis
-
+    image: redis:8-alpine
     ports:
       - "6379:6379"
 
-    volumes:
-      - redis_data:/data
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "19000:9000"
+      - "19001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
 
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-    restart: unless-stopped
+  analytics-service:
+    build:
+      context: ./applications/analytics-service
+    depends_on:
+      - postgres
 
 volumes:
   postgres_data:
-  redis_data:

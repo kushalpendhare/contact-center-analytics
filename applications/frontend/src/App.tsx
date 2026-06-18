@@ -1,44 +1,74 @@
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { getAccessToken, getCurrentUser, clearSession } from "./services/authService";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Dashboard from "./pages/Dashboard";
-import Login from "./pages/Login";
-import ProjectDetails from "./pages/ProjectDetails";
-import Projects from "./pages/Projects";
-import Reports from "./pages/Reports";
-import Settings from "./pages/Settings";
-import Uploads from "./pages/Uploads";
-import Recordings from "./pages/Recordings";
-import RecordingDetailPage from "./pages/RecordingAnalysis";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 function App() {
-  const navigate = useNavigate();
+  const [calls, setCalls] = useState<any[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+
+  const loadCalls = () => {
+    axios
+      .get("http://localhost:8000/calls")
+      .then((res) => setCalls(res.data));
+  };
 
   useEffect(() => {
-    const token = getAccessToken();
+    loadCalls();
 
-    if (!token) return;
+    const interval = setInterval(loadCalls, 5000);
 
-    getCurrentUser().catch(() => {
-      clearSession();
-      navigate("/login");
-    });
-  }, [navigate]);
+    return () => clearInterval(interval);
+  }, []);
+
+  const uploadFile = async () => {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    await axios.post(
+      "http://localhost:8000/upload",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    setFile(null);
+    loadCalls();
+  };
 
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-      <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
-      <Route path="/projects/:projectId/recordings" element={<ProtectedRoute><Recordings /></ProtectedRoute>} />
-      <Route path="/projects/:projectId/recordings/:recordingId" element={<ProtectedRoute><RecordingDetailPage /></ProtectedRoute>} />
-      <Route path="/uploads" element={<ProtectedRoute><Uploads /></ProtectedRoute>} />
-      <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-      <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <div style={{ padding: "20px" }}>
+      <h1>Contact Center Analytics</h1>
+
+      <input
+        type="file"
+        onChange={(e) =>
+          setFile(e.target.files?.[0] || null)
+        }
+      />
+
+      <button
+        onClick={uploadFile}
+        style={{ marginLeft: "10px" }}
+      >
+        Upload Recording
+      </button>
+
+      <hr />
+
+      <h2>Calls</h2>
+
+      {calls.map((call) => (
+        <div key={call.id}>
+          <strong>{call.filename}</strong>
+          {" - "}
+          {call.status}
+        </div>
+      ))}
+    </div>
   );
 }
 
