@@ -1,73 +1,149 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { Routes, Route } from "react-router-dom";
+
+import Sidebar from "./components/Sidebar";
+
+import Dashboard from "./pages/Dashboard";
+import Calls from "./pages/Calls";
+import Analytics from "./pages/Analytics";
+import Upload from "./pages/Upload";
+import CallDetails from "./pages/CallDetails";
+import Login from "./pages/Login";
+
+import ProtectedRoute from "./components/ProtectedRoute";
+
+import { useAuth } from "./context/AuthContext";
+
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
+import Organizations from "./pages/Organizations";
+import Users from "./pages/Users";
+import Subscriptions from "./pages/Subscriptions";
 
 function App() {
-  const [calls, setCalls] = useState<any[]>([]);
-  const [file, setFile] = useState<File | null>(null);
+  const { token, user } =
+    useAuth();
 
-  const loadCalls = () => {
-    axios
-      .get("http://localhost:8000/calls")
-      .then((res) => setCalls(res.data));
-  };
-
-  useEffect(() => {
-    loadCalls();
-
-    const interval = setInterval(loadCalls, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const uploadFile = async () => {
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    await axios.post(
-      "http://localhost:8000/upload",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+  if (!token) {
+    return (
+      <Routes>
+        <Route
+          path="*"
+          element={<Login />}
+        />
+      </Routes>
     );
-
-    setFile(null);
-    loadCalls();
-  };
+  }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Contact Center Analytics</h1>
+    <div
+      style={{
+        display: "flex",
+        minHeight: "100vh",
+        background:
+          "#FFF9EC",
+      }}
+    >
+      <Sidebar />
 
-      <input
-        type="file"
-        onChange={(e) =>
-          setFile(e.target.files?.[0] || null)
-        }
-      />
-
-      <button
-        onClick={uploadFile}
-        style={{ marginLeft: "10px" }}
+      <div
+        style={{
+          flex: 1,
+          padding: "30px",
+        }}
       >
-        Upload Recording
-      </button>
+        <Routes>
+          {/* SUPER ADMIN */}
 
-      <hr />
+          {user?.role ===
+            "SUPER_ADMIN" && (
+            <>
+              <Route
+                path="/"
+                element={
+                  <SuperAdminDashboard />
+                }
+              />
 
-      <h2>Calls</h2>
+              <Route
+                path="/organizations"
+                element={
+                  <Organizations />
+                }
+              />
 
-      {calls.map((call) => (
-        <div key={call.id}>
-          <strong>{call.filename}</strong>
-          {" - "}
-          {call.status}
-        </div>
-      ))}
+              <Route
+                path="/users"
+                element={
+                  <Users />
+                }
+              />
+
+              <Route
+                path="/subscriptions"
+                element={
+                  <Subscriptions />
+                }
+              />
+            </>
+          )}
+
+          {/* ORG ADMIN */}
+
+          {user?.role !==
+            "SUPER_ADMIN" && (
+            <>
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/calls"
+                element={
+                  <ProtectedRoute>
+                    <Calls />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/analytics"
+                element={
+                  <ProtectedRoute>
+                    <Analytics />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/upload"
+                element={
+                  <ProtectedRoute>
+                    <Upload />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/calls/:id"
+                element={
+                  <ProtectedRoute>
+                    <CallDetails />
+                  </ProtectedRoute>
+                }
+              />
+            </>
+          )}
+
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+        </Routes>
+      </div>
     </div>
   );
 }

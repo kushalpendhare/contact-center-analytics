@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 
 from ..database import SessionLocal
 from ..models import Call
@@ -13,6 +14,7 @@ router = APIRouter()
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+
 def get_db():
     db = SessionLocal()
     try:
@@ -22,7 +24,10 @@ def get_db():
 
 
 @router.post("/calls", response_model=CallResponse)
-def create_call(call: CallCreate, db: Session = Depends(get_db)):
+def create_call(
+    call: CallCreate,
+    db: Session = Depends(get_db)
+):
     call_record = Call(
         filename=call.filename,
         status="UPLOADED"
@@ -36,8 +41,71 @@ def create_call(call: CallCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/calls")
-def get_calls(db: Session = Depends(get_db)):
-    return db.query(Call).all()
+def get_calls(
+    db: Session = Depends(get_db)
+):
+    return (
+        db.query(Call)
+        .order_by(Call.id.desc())
+        .all()
+    )
+
+
+@router.get("/calls/{call_id}")
+def get_call(
+    call_id: int,
+    db: Session = Depends(get_db)
+):
+    call = (
+        db.query(Call)
+        .filter(Call.id == call_id)
+        .first()
+    )
+
+    if not call:
+        return {
+            "error": "Call not found"
+        }
+
+    return call
+
+
+@router.get("/transcripts/{call_id}")
+def get_transcript(
+    call_id: int,
+    db: Session = Depends(get_db)
+):
+    result = db.execute(
+        text(
+            """
+            SELECT
+                t.id,
+                t.call_id,
+                t.transcript,
+                t.sentiment,
+                t.summary,
+                t.created_at
+            FROM transcripts t
+            WHERE t.call_id = :call_id
+            """
+        ),
+        {"call_id": call_id}
+    )
+
+    row = result.mappings().first()
+
+    if not row:
+        return None
+
+    return {
+        "id": row["id"],
+        "call_id": row["call_id"],
+        "transcript": row["transcript"],
+        "sentiment": row["sentiment"],
+        "summary": row["summary"],
+        "created_at": row["created_at"]
+    }
+
 
 @router.post("/upload")
 async def upload_call(
